@@ -1,10 +1,13 @@
-
 math2 := module()
 description "Some useful tools for Math 2 exams";
 option package;
-export prik, kryds, len, vop, conv_check, conv_radi, leibniz_criterion, tranf_func, sys_tranf, equiv, outarg, alternate_approximation;
+export prik, kryds, len, vop, phase_portrait, conv_check, decomp, conv_radi, leibniz_criterion, tranf_func, sys_tranf, equiv, outarg, method2;
     	with(LinearAlgebra);
     	with(plots);
+	with(plottools);
+	with(ArrayTools);
+    	with(DEtools);
+    	
 # 	interface(imaginaryunit=i);
 
 
@@ -14,7 +17,7 @@ export prik, kryds, len, vop, conv_check, conv_radi, leibniz_criterion, tranf_fu
     	end proc;
 
     	kryds:= proc(x::Vector, y::Vector)
-    	description "krydsprodukt mellem v ektorer";
+    	description "krydsprodukt mellem vektorer";
         	return convert(VectorCalculus[CrossProduct](x,y),Vector);
     	end proc;
 
@@ -28,8 +31,8 @@ export prik, kryds, len, vop, conv_check, conv_radi, leibniz_criterion, tranf_fu
         	op(convert(x,list))
     	end proc:
 
-    #Konvergens tjek af en række
-    #kunne være sejt at indføre ækvivalens kriteriet LOL
+    	#Konvergens tjek af en række
+    	#kunne være sejt at indføre ækvivalens kriteriet LOL
     	conv_check := proc(a)
     		local kvo;
     		#n'te-ledskriteriet
@@ -48,7 +51,6 @@ export prik, kryds, len, vop, conv_check, conv_radi, leibniz_criterion, tranf_fu
 		else
 			print("Kvotientkriteriet siger ikke noget");
 		end if;
-
 
 		#Integralkriteriet
 		if abs(evalf(int(abs(a), n = 1 .. infinity))) < infinity then
@@ -80,8 +82,24 @@ export prik, kryds, len, vop, conv_check, conv_radi, leibniz_criterion, tranf_fu
 		end if;
 	end proc:
 
-	#Approksimation jeg ikke ved hvornår man skal bruge
-	alternate_approximation := proc(a,epsilon)
+	#Dekomposition
+	decomp := proc(b)
+		return convert(b,parfrac,x);
+	end proc:
+
+	#Faseportræt omkring (0,0)
+	phase_portrait := proc(eqn1,eqn2)
+		local ic1, ic2;
+		ic1 := x1(0)=-0.5, x2(0)=1;ic2 := x1(0)=0.5, x2(0)=-0.5;
+		DEplot([eqn1,eqn2],[x1(t),x2(t)], t=-1..1,[[ic1],[ic2]],stepsize=.05);
+	end proc:
+	
+	#Metode (i)
+	
+
+	#Metode (ii) 
+	#Approksimation jeg ikke ved hvornår man skal bruge (approksimation af fejl)
+	method2 := proc(a,epsilon)
 		print(ceil(max(solve(abs(subs(n=N+1,a)) = epsilon,N))));
 	end proc:
 
@@ -97,7 +115,9 @@ export prik, kryds, len, vop, conv_check, conv_radi, leibniz_criterion, tranf_fu
 	conv_radi := proc(a)
 		local kvotient, li, rho;
 		kvotient := abs(subs(n = n + 1, a)/a);
+		print(kvotient);
 		li := limit(kvotient, n = infinity);
+		print(li);
 		rho := solve(li = 1, x);
 		print("radius of convergence is jvf. sætning 4.30. then "*'rho' = rho);
 	end proc;
