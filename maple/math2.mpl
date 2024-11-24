@@ -7,6 +7,7 @@ export prik, kryds, len, vop, phase_portrait, conv_check, decomp, conv_radi, lei
 	with(plottools);
 	with(ArrayTools);
     	with(DEtools);
+    	with(ListTools);
     	
 # 	interface(imaginaryunit=i);
 
@@ -34,36 +35,64 @@ export prik, kryds, len, vop, phase_portrait, conv_check, decomp, conv_radi, lei
     	#Konvergens tjek af en række
     	#kunne være sejt at indføre ækvivalens kriteriet LOL
     	conv_check := proc(a)
-    		local kvo;
+    		local kvo, bn, integral,smol;
     		#n'te-ledskriteriet
     		if limit(a, n = infinity) <> 0 then
     			print("Nej, fra n'te ledskriteriet sætn. 4.7, rækken er divergent");
-		return ;
+		return;
 		else
 			print("n'te-ledskriteriet siger ikke noget");
 		end if;
-		
-		#Kvotientkriteriet
-		kvo := subs(n = n + 1, abs(a))/abs(a);
-		if limit(kvo, n = infinity) < 1 then
+
+		# Kvotientkriteriet
+		kvo := limit(abs(subs(n = n + 1, a)/a), n = infinity);
+		bn:=eval(numer(a),{cos=1,sin=1})/denom(a);
+		if kvo < 1 then
 			print("Absolut konvergent ifølge kvotientkriteriet sætn. 4.30");
-		return ;
-		else
-			print("Kvotientkriteriet siger ikke noget");
+		return;
+		elif kvo > 1 then
+		 	print("Divergent ifølge kvotientkriteriet sætn. 4.30");
+	 	return;
+		# Sammenligningskriteriet
+	 	elif kvo = undefined then
+	 		print("Prøver med sammenligningskriteriet, hvor der tjekkes konvergensen af");
+	 		print(bn);
+	 		conv_check(bn);
+	 		return;
+		elif kvo = 1 then
+			print("Kvotientkriteriet siger ikke noget, da kvotienten er 1");
 		end if;
 
-		#Integralkriteriet
+		# Integralkriteriet
+#		integral:=n-> eval(a,(-1)^n=1);
+#		smol:=ceil(FindMaximalElement([fsolve(numer(diff(row_C(x),x))=0)]));
+#		
+#		if int(row_C(x),x=smol..infinity) = infinity then
+#			print("Integralet er uendelig, og da divergent iflg. Integralkriteriet sætn. 4.33");
+#		return;
+#		elif int(abs(row_C(x)),x=smol..infinity) = infinity then
+#			print("Integralet er betinget konvergent iflg sætn.4.33 og def 4.28");
+#		return;
+#		else
+#			print("Integralet er absolut konvergent iflg sætn 4.33 og def 4.28");
+#		end if;
+		
 		if abs(evalf(int(abs(a), n = 1 .. infinity))) < infinity then
-			print("Absolut konvergent iflg. integralkriteriet sætn. 4.33 og def. 4.26");
+		print("Absolut konvergent iflg. integralkriteriet sætn. 4.33 og def. 4.26");
+		return;	
 		elif abs(evalf(int(abs(a), n = 2 .. infinity))) = Float(infinity) then
 			print("Betinget konvergent iflg. integralkriteriet sætn. 4.33");
-		return ;
+		return;
 		else
 			print("Divergent iflg. Integralkriteriet sætn. 4.33");
 		return ;
 		end if;
-	
+
 	end proc;
+
+	#Sammenligningskriteriet
+
+	
 
 	#Leibniz criterion, is used for alternating series.
 	leibniz_criterion := proc(b)
